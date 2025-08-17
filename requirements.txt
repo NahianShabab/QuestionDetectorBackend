@@ -1,0 +1,11 @@
+fastapi[standard]
+pydantic
+psycopg[binary]
+python-dotenv
+bcrypt
+pyjwt
+argparse
+
+opencv-python
+numpy
+pillow
