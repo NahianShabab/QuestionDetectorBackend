@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import random
 from PIL import ImageDraw,Image
+from utils.response import create_message
 
 DPI = 300
 INCH_TO_MM = 25.4 # 1 inch = what mm 
@@ -122,8 +123,9 @@ for i in range(NUMBER_OF_OPTIONS):
     #     (chr(ord('A')+i),[option_label_text_x,option_label_text_y])
     # )
 
+
 def detect_and_save_image(original_img:np.ndarray):
-    # input_image_path = r"C:\Users\User\Downloads\20250812_202939.jpg"
+
     image = cv2.cvtColor(original_img,cv2.COLOR_BGR2GRAY)
     print('Thresholding Image...')
     _,image = cv2.threshold(image,127,255,cv2.THRESH_BINARY)
@@ -133,11 +135,11 @@ def detect_and_save_image(original_img:np.ndarray):
 
     print('Detecting Markers')
     corners,ids,rejected = detector.detectMarkers(image)
+    if(ids is None or ids.size!=4):
+        print('4 markers not detected, returning...')
+        return (False,'Not all 4 markers are detected')
     ids = ids.flatten()
     print(f'{ids.size} Markers detected')
-    if(ids.size!=4):
-        print('4 markers not detected, returning...')
-        return
     # print(ids)
     marker_positions_centered ={
         0: (MARGIN_SIZE_PX+A_MARKER_SIZE_PX//2,MARGIN_SIZE_PX+A_MARKER_SIZE_PX//2),
@@ -167,15 +169,11 @@ def detect_and_save_image(original_img:np.ndarray):
 
     # Apply perspective transformation
     extracted = cv2.warpPerspective(original_img, matrix, (A4_WIDTH_PX, A4_HEIGHT_PX))
-    # extracted = np.array(cv2.threshold(extracted,thresh=0.5,maxval=255,type=cv2.THRESH_BINARY))
-
-    # After perspective correction, add these steps:
-
-    # After perspective correction:
-    # extracted = cv2.GaussianBlur(extracted, (1, 1), 0)  # Light denoising
-    # _, extracted = cv2.threshold(extracted, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    # print(extracted)
+    question_images = {}
+    for i,bb in enumerate(question_1_blank_boxes):
+        cropped_box = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
+        cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
+        question_images[i+1] = cropped_box
     print('Extracted the Image')
     # output_path = 'extracted_image.png'
     extracted = cv2.cvtColor(extracted,cv2.COLOR_BGR2RGB)
@@ -191,7 +189,7 @@ def detect_and_save_image(original_img:np.ndarray):
     # Save the extracted document
     cv2.imwrite('extracted.png', extracted)
     print('Saved the Image')
-
+    return True,{'question_images':question_images,'extracted_image':extracted}
     # for i in [8,9,10]:
     #     bb = question_1_blank_boxes[i]
     #     sliced_image = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
