@@ -24,7 +24,7 @@ if __name__=='__main__':
     parser.add_argument('--username',required=True)
     parser.add_argument('--password',required=True)
     parser.add_argument('--first-name',required=True)
-    parser.add_argument('--last-name',required=True)
+    parser.add_argument('--last-name',required=False)
     parser.add_argument('--user-role',required=True)
     parser.add_argument('--email',required=False)
     args = parser.parse_args()
@@ -49,9 +49,9 @@ if __name__=='__main__':
     if not args.username.isalnum():
         print('username must be alphanumeric')
         exit()
-    # if not args.last_name.isalnum():
-    #     print('Last name must be alphanumeric')
-    #     exit()
+    if args.last_name is not None and not args.last_name.isalnum():
+        print('Last name must be alphanumeric')
+        exit()
     if not args.first_name.isalnum():
         print('First name must be alphanumeric')
         exit()

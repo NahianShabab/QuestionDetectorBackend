@@ -11,7 +11,7 @@ class UserBase(BaseModel):
     username:str
     user_role:str
     first_name:str
-    last_name:str
+    last_name:str|None
     email:str|None
 
 class ExistingUser(UserBase):
