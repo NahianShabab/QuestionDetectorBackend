@@ -31,19 +31,17 @@ async def upload_image(img:UploadFile,config:dict=Depends(get_config)):
     # cv2.imwrite('image.jpg',nparr)
     success,data = image_detector.detect_and_save_image(img_arr)
     if success:
-        return create_message(True,'')
+        response = create_message(True,'')
+        response['data'] = data
+        return response
     else:
         return create_message(False,data)
     
 
-@router.get('/image',response_class=responses.HTMLResponse)
+@router.get('/image')
 async def get_image():
     img = cv2.imread('extracted.png')
     success,buffer = cv2.imencode('.png',img)
     img_str = base64.b64encode(buffer.tobytes()).decode('ascii')
     
-    html_content = f"""
-    <h1>Hi ya</h1>
-    <img src="data:image/png;base64,{img_str}" alt="My Image"/>
-    """
-    return html_content
+    return {'img':img_str} 
