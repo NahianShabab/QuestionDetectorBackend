@@ -12,7 +12,7 @@ from config import get_config
 from utils.response import create_message
 router = APIRouter(prefix='/setter',tags=['Question Setter'])
 
-@router.post('/image')
+@router.post('/verify_image')
 async def upload_image(img:UploadFile,config:dict=Depends(get_config)):
     print(img.size)
     max_image_size_mb = int(config['MAX_IMAGE_UPLOAD_SIZE_MB'])

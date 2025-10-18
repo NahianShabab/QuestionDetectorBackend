@@ -171,10 +171,16 @@ def detect_and_save_image(original_img:np.ndarray):
     # Apply perspective transformation
     extracted = cv2.warpPerspective(original_img, matrix, (A4_WIDTH_PX, A4_HEIGHT_PX))
     question_images = []
+    
     for i,bb in enumerate(question_1_blank_boxes):
         cropped_box = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
-        cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
+        # cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
         question_images.append(convert_image_to_base64(cropped_box))
+    option_images = []
+    for i,bb in enumerate(option_blank_boxes):
+        cropped_box = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
+        # cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
+        option_images.append(convert_image_to_base64(cropped_box))
     print('Extracted the Image')
     # output_path = 'extracted_image.png'
     extracted = cv2.cvtColor(extracted,cv2.COLOR_BGR2RGB)
@@ -183,8 +189,13 @@ def detect_and_save_image(original_img:np.ndarray):
 
     for bb in question_1_blank_boxes:
         draw.rectangle(bb,outline=(0,255,0),width=3)
-    extracted = np.array(extracted)
+    
 
+    for i,bb in enumerate(option_blank_boxes):
+      outline_color = (0,0,255) if i<4 else (0,255,255)
+      draw.rectangle(bb,outline=outline_color,width=3)  
+
+    extracted = np.array(extracted)
     extracted = cv2.cvtColor(extracted,cv2.COLOR_RGB2BGR)
     cv2.imwrite('extracted.png', extracted)
     extracted = convert_image_to_base64(extracted)
@@ -192,7 +203,7 @@ def detect_and_save_image(original_img:np.ndarray):
     # Save the extracted document
     
     print('Saved the Image')
-    return True,{'question_images':question_images,'extracted_image':extracted}
+    return True,{'question_images':question_images,'extracted_image':extracted,'option_images':option_images}
     # for i in [8,9,10]:
     #     bb = question_1_blank_boxes[i]
     #     sliced_image = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
