@@ -29,3 +29,32 @@ class UserCreate(UserBase):
 class UserRead(ExistingUser):
     pass
 #endregion
+
+
+#region Question
+
+class Question(BaseModel):
+    question_id:int
+    submitted_by:int
+    is_confirmed:bool
+
+class QuestionImageFragment(BaseModel):
+    image_id:int
+    image_order:int
+    question_id:int
+    transcripted_by:int|None
+    transcript:str|None
+    
+class QuestionOption(BaseModel):
+    option_id:int
+    is_correct:bool
+    question_id:int
+    
+class QuestionOptionImageFragment(BaseModel):
+    image_id:int
+    image_order:int
+    question_id:int
+    option_id:int
+    transcripted_by:int|None
+    transcript:str|None
+#endregion

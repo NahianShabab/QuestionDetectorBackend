@@ -1,2 +1,5 @@
 __pycache__
 .secret_env
+question_fragmented_images/
+question_images/
+question_option_fragmented_images

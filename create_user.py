@@ -1,7 +1,7 @@
-# This script is used for bootstrapping a new user. This 
+# This script is used for creating a new user in the database. This 
 # bypasses normal checking, to allow for at least one user
 # to be created before auth is implemented
-# This is not part of normal backend loop
+# This is not part of normal backend authernticated operations
 # Run this wisely!
 
 import database

@@ -4,7 +4,37 @@ import random
 from PIL import ImageDraw,Image
 from utils.response import create_message
 import base64
+from pathlib import Path
 
+
+# Directories
+QUESTION_IMAGES_DIR = Path('question_images')
+QUESTION_IMAGE_FRAGMENTS_DIR = Path('question_fragmented_images')
+OPTION_FRAGMENTS_DIR = Path('question_option_fragmented_images')
+
+QUESTION_IMAGES_DIR.mkdir(exist_ok=True)
+QUESTION_IMAGE_FRAGMENTS_DIR.mkdir(exist_ok=True)
+OPTION_FRAGMENTS_DIR.mkdir(exist_ok=True)
+
+def save_question_image(question_id:int,img:np.ndarray):
+    img_path = QUESTION_IMAGES_DIR / f'question_{question_id}.png'
+    cv2.imwrite(str(img_path),img)
+    
+def load_question_image(question_id:int):
+    img_path = QUESTION_IMAGES_DIR / f'question_{question_id}.png'
+    img = cv2.imread(str(img_path))
+    if img is None:
+        return None
+    return convert_image_to_base64(img)
+
+def save_question_image_fragment(question_id:int,image_order,img:np.ndarray):
+    img_path = QUESTION_IMAGE_FRAGMENTS_DIR / f'question_{question_id}_{image_order}.png'
+    cv2.imwrite(str(img_path),img)
+def save_option_image_fragment(question_id:int,option_id:int,image_order:int,img:np.ndarray):
+    img_path = OPTION_FRAGMENTS_DIR / f'question_{question_id}_option_{option_id}_{image_order}.png'
+    cv2.imwrite(str(img_path),img)
+
+# Question Paper Processing
 DPI = 300
 INCH_TO_MM = 25.4 # 1 inch = what mm 
 
@@ -125,7 +155,7 @@ for i in range(NUMBER_OF_OPTIONS):
     # )
 
 
-def detect_and_save_image(original_img:np.ndarray):
+def detect_question_image(original_img:np.ndarray,convert_to_base64:bool=True):
 
     image = cv2.cvtColor(original_img,cv2.COLOR_BGR2GRAY)
     print('Thresholding Image...')
@@ -175,12 +205,13 @@ def detect_and_save_image(original_img:np.ndarray):
     for i,bb in enumerate(question_1_blank_boxes):
         cropped_box = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
         # cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
-        question_images.append(convert_image_to_base64(cropped_box))
-    option_images = []
+        question_images.append(convert_image_to_base64(cropped_box) if convert_to_base64 else cropped_box)
+    option_images = [[] for i in range(NUMBER_OF_OPTIONS)]
+    
     for i,bb in enumerate(option_blank_boxes):
         cropped_box = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]
         # cv2.imwrite(f'question_part_{i+1}.png',cropped_box)
-        option_images.append(convert_image_to_base64(cropped_box))
+        option_images[i//NUMBER_OF_BLANK_BOXES_PER_LINE].append(convert_image_to_base64(cropped_box) if convert_to_base64 else cropped_box)
     print('Extracted the Image')
     # output_path = 'extracted_image.png'
     extracted = cv2.cvtColor(extracted,cv2.COLOR_BGR2RGB)
@@ -197,13 +228,13 @@ def detect_and_save_image(original_img:np.ndarray):
 
     extracted = np.array(extracted)
     extracted = cv2.cvtColor(extracted,cv2.COLOR_RGB2BGR)
-    cv2.imwrite('extracted.png', extracted)
-    extracted = convert_image_to_base64(extracted)
+    # cv2.imwrite('extracted.png', extracted)
+    extracted = convert_image_to_base64(extracted) if convert_to_base64 else extracted
     # print(extracted.shape)
     # Save the extracted document
     
     print('Saved the Image')
-    return True,{'question_images':question_images,'extracted_image':extracted,'option_images':option_images}
+    return True,{'question_images':question_images,'extracted_image':extracted,'option_images_list':option_images}
     # for i in [8,9,10]:
     #     bb = question_1_blank_boxes[i]
     #     sliced_image = extracted[bb[0][1]:bb[1][1],bb[0][0]:bb[1][0]]

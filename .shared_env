@@ -1,3 +1,3 @@
 # Shareable environmental variables to configure the behavior of the server
 TOKEN_EXPIRATION_TIME_IN_DAYS = 2
-MAX_IMAGE_UPLOAD_SIZE_MB = 20
+MAX_IMAGE_UPLOAD_SIZE_MB = 200
