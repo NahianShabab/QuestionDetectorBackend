@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_utils.tasks import repeat_every
 # from mypackage import mymodule
 import database
-from routers import users,setters
+from routers import users,setters,composers
 
 app = FastAPI()
 
@@ -21,10 +21,13 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(setters.router)
+app.include_router(composers.router)
 
 @app.on_event("startup")
-@repeat_every(seconds=10)  # 1 hour
-def my_repeating_function():
-    # print('hey look! its my repeating function!')
+@repeat_every(seconds=20)  # 1 hour
+async def my_repeating_function():
+    print('Assiging Composers...',end=None)
+    await database.assign_composers_to_images()
+    print('Done!')
     pass
     

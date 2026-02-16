@@ -4,7 +4,7 @@ import psycopg
 import asyncio
 
 from config import get_config
-from models import UserCreate,UserRead,UserDatabase,Question,QuestionImageFragment,\
+from models import QuestionOptionImageFragment, UserCreate,UserRead,UserDatabase,Question,QuestionImageFragment,\
     QuestionOption
 from security import get_hashed_text
 import sys
@@ -137,16 +137,18 @@ async def get_all_questions_from_setter(user_id:int):
     'transcribed', COALESCE(
         (
         SELECT json_agg(json_build_object('question_id',sq.question_id,'question_transcription',
-            (select string_agg(transcript,' ') from question_image_fragment qif where qif.question_id=sq.question_id),
+            (select string_agg(transcript,' ' ORDER BY IMAGE_ORDER) from question_image_fragment qif where qif.question_id=sq.question_id),
             'options',(select json_agg(json_build_object('option_id',option_id,'is_correct',is_correct,
-            'option_transcription',(select string_agg(qoif.transcript,' ') from question_option_image_fragment qoif where qoif.question_id=sq.question_id
+            'option_transcription',(select string_agg(qoif.transcript,' ' order by image_order) 
+            from question_option_image_fragment qoif where qoif.question_id=sq.question_id and qoif.option_id=qo.option_id
             )) order by qo.option_id) from question_option qo where qo.question_id = sq.question_id
             )
             )
         
         )
         FROM submitted_question sq
-        WHERE sq.submitted_by = %(user_id)s 
+        WHERE sq.submitted_by = %(user_id)s
+        and sq.is_confirmed=false 
         AND
         (
         not exists (select 1 from question_image_fragment qif where qif.question_id = sq.question_id and transcript is null) and
@@ -158,17 +160,23 @@ async def get_all_questions_from_setter(user_id:int):
     'confirmed', COALESCE(
         (
         SELECT json_agg(json_build_object('question_id',sq.question_id,'question_transcription',
-            (select string_agg(transcript,' ') from question_image_fragment qif where qif.question_id=sq.question_id),
+            (select string_agg(transcript,' ' ORDER BY IMAGE_ORDER) from question_image_fragment qif where qif.question_id=sq.question_id),
             'options',(select json_agg(json_build_object('option_id',option_id,'is_correct',is_correct,
-            'option_transcription',(select string_agg(qoif.transcript,' ') from question_option_image_fragment qoif where qoif.question_id=sq.question_id
+            'option_transcription',(select string_agg(qoif.transcript,' ' order by image_order) 
+            from question_option_image_fragment qoif where qoif.question_id=sq.question_id and qoif.option_id=qo.option_id
             )) order by qo.option_id) from question_option qo where qo.question_id = sq.question_id
             )
             )
         
         )
         FROM submitted_question sq
-        WHERE sq.submitted_by = %(user_id)s 
-        and sq.is_confirmed=true
+        WHERE sq.submitted_by = %(user_id)s
+        and sq.is_confirmed=true 
+        AND
+        (
+        not exists (select 1 from question_image_fragment qif where qif.question_id = sq.question_id and transcript is null) and
+        not exists (select 1 from question_option_image_fragment qoif where qoif.question_id = sq.question_id and transcript is null)
+        )
         ),
         '[]'::json
     )
@@ -188,5 +196,142 @@ async def get_question(question_id:int)->Question:
     if result is None:
         return None
     return Question(question_id=question_id,submitted_by=result[2],is_confirmed=result[1])
+
+async def delete_question(question_id:int):
+    conn,cur = await get_connection()
+    await cur.execute('DELETE FROM SUBMITTED_QUESTION WHERE QUESTION_ID=%s',(question_id,))
+    await close_connection(conn,cur)
+
+async def question_has_all_images_transcribed(question_id:int)->bool:
+    conn,cur = await get_connection()
+    result =  await(await cur.execute('SELECT 1 FROM SUBMITTED_QUESTION SQ WHERE \
+        SQ.QUESTION_ID=%s and ( EXISTS (SELECT 1 FROM QUESTION_IMAGE_FRAGMENT QIF WHERE \
+        QIF.QUESTION_ID = SQ.QUESTION_ID AND QIF.TRANSCRIPT IS NULL) OR \
+            EXISTS (SELECT 1 FROM QUESTION_OPTION_IMAGE_FRAGMENT QOIF WHERE \
+        QOIF.QUESTION_ID = SQ.QUESTION_ID AND QOIF.TRANSCRIPT IS NULL) )',(question_id,))).fetchone()
+    await close_connection(conn,cur)
+
+    return result is None
+
+
+async def confirm_questions(question_ids:list[int]):
+    conn,cur = await get_connection()
+    params = [(qid,) for qid in question_ids]
+    await cur.executemany('UPDATE SUBMITTED_QUESTION SET IS_CONFIRMED=TRUE where question_id=%s',params)
+    await close_connection(conn,cur)
+
+async def assign_composers_to_images():
+    conn,cur = await get_connection()
+    await cur.execute('''
+        -- Evenly distributed assignment for QUESTION_IMAGE_FRAGMENT
+        WITH unassigned AS (
+            SELECT image_id, 
+                ROW_NUMBER() OVER (ORDER BY random()) as rn
+            FROM question_image_fragment
+            WHERE transcripted_by IS NULL
+        ),
+        composers AS (
+            SELECT user_id,
+                ROW_NUMBER() OVER (ORDER BY random()) as rn
+            FROM users
+            WHERE user_role = 'composer'
+        )
+        UPDATE question_image_fragment qif
+        SET transcripted_by = c.user_id
+        FROM unassigned u
+        JOIN composers c ON (u.rn - 1) % (SELECT COUNT(*) FROM composers) + 1 = c.rn
+        WHERE qif.image_id = u.image_id;
+
+        -- Evenly distributed assignment for QUESTION_OPTION_IMAGE_FRAGMENT
+        WITH unassigned AS (
+            SELECT image_id, 
+                ROW_NUMBER() OVER (ORDER BY random()) as rn
+            FROM question_option_image_fragment
+            WHERE transcripted_by IS NULL
+        ),
+        composers AS (
+            SELECT user_id,
+                ROW_NUMBER() OVER (ORDER BY random()) as rn
+            FROM users
+            WHERE user_role = 'composer'
+        )
+        UPDATE question_option_image_fragment qoif
+        SET transcripted_by = c.user_id
+        FROM unassigned u
+        JOIN composers c ON (u.rn - 1) % (SELECT COUNT(*) FROM composers) + 1 = c.rn
+        WHERE qoif.image_id = u.image_id;
+    ''')
+    await close_connection(conn,cur)
+    pass
+
+#endregion
+
+
+#region QuestionImageFragment
+async def get_question_image_fragment(image_id:int)->None|QuestionImageFragment:
+    conn,cur = await get_connection()
+    r = await(await\
+        cur.execute('SELECT IMAGE_ID,IMAGE_ORDER,QUESTION_ID,TRANSCRIPTED_BY,TRANSCRIPT\
+        FROM QUESTION_IMAGE_FRAGMENT WHERE IMAGE_ID=%s limit 1',(image_id,))).fetchone()
+    await close_connection(conn,cur)
+    if r is None:
+        return None
+    return QuestionImageFragment(image_id=r[0],image_order=r[1],question_id=r[2],transcripted_by=r[3],
+            transcript=r[4])
+
+async def get_next_question_image_fragment_for_composer(composer_id:int)->int|None:
+    conn,cur = await get_connection()
+    r = await(await\
+        cur.execute('SELECT IMAGE_ID\
+        FROM QUESTION_IMAGE_FRAGMENT WHERE\
+        TRANSCRIPTED_BY=%s AND TRANSCRIPT IS NULL limit 1',(composer_id,))).fetchone()
+    await close_connection(conn,cur)
+    if r is None:
+        return None
+    return r[0]
+
+async def add_transcript_to_question_image(image_id:int,transcript:str):
+    conn,cur = await get_connection()
+    await cur.execute('UPDATE QUESTION_IMAGE_FRAGMENT SET TRANSCRIPT=%s WHERE IMAGE_ID=%s',\
+                      (transcript,image_id))
+    await close_connection(conn,cur)
+
+#endregion
+
+
+
+#region QuestionOptionImageFragment
+
+async def get_question_option_image_fragment(image_id:int)->None|QuestionOptionImageFragment:
+    conn,cur = await get_connection()
+    r = await(await\
+        cur.execute('SELECT IMAGE_ID,IMAGE_ORDER,QUESTION_ID,OPTION_ID,TRANSCRIPTED_BY,TRANSCRIPT\
+        FROM QUESTION_OPTION_IMAGE_FRAGMENT WHERE IMAGE_ID=%s limit 1',(image_id,))).fetchone()
+    await close_connection(conn,cur)
+    if r is None:
+        return None
+    return QuestionOptionImageFragment(image_id=r[0],image_order=r[1],question_id=r[2],option_id=r[3],
+            transcripted_by=r[4],transcript=r[5])
+
+
+async def get_next_question_option_image_fragment_for_composer(composer_id:int)->int|None:
+    conn,cur = await get_connection()
+    r = await(await\
+        cur.execute('SELECT IMAGE_ID\
+        FROM QUESTION_OPTION_IMAGE_FRAGMENT WHERE\
+        TRANSCRIPTED_BY=%s AND TRANSCRIPT IS NULL limit 1',(composer_id,))).fetchone()
+    await close_connection(conn,cur)
+    if r is None:
+        return None
+    return r[0]
+
+async def add_transcript_to_question_option_image(image_id:int,transcript:str):
+    conn,cur = await get_connection()
+    await cur.execute('UPDATE QUESTION_OPTION_IMAGE_FRAGMENT SET TRANSCRIPT=%s WHERE IMAGE_ID=%s',\
+                      (transcript,image_id))
+    await close_connection(conn,cur)
+
+
+
 
 #endregion

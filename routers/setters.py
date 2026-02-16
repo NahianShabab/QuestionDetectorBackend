@@ -112,3 +112,28 @@ async def get_question_image(question_id:int,cu:UserRead=Depends(check_current_u
     if question.submitted_by!=cu.user_id:
         return None
     return image_detector.load_question_image(question_id)
+
+@router.delete('/delete-questions')
+async def delete_questions(question_ids:list[int],cu:UserRead=Depends(check_current_user_role(['setter']))):
+    print('These are the question ids you want deleted: ',question_ids)
+    for qid in question_ids:
+        question = await database.get_question(qid)
+        if question is None or question.submitted_by!=cu.user_id or question.is_confirmed:
+            continue
+        await database.delete_question(qid)
+        image_detector.delete_question_image(qid)
+    return 'Questions Deleted!'
+
+@router.patch('/confirm-questions')
+async def confirm_questions(question_ids:list[int],cu:UserRead=Depends(check_current_user_role(['setter']))):
+    candidate_ids:list[int]= []
+    for qid in question_ids:
+        question = await database.get_question(qid)
+        if question is None or question.submitted_by!=cu.user_id or question.is_confirmed:
+            continue
+        is_completely_transcribed = await database.question_has_all_images_transcribed(qid)
+        if is_completely_transcribed:
+            candidate_ids.append(qid)
+    await database.confirm_questions(candidate_ids)
+    return f'Confirmed {len(candidate_ids)} Questions!'
+

@@ -17,22 +17,41 @@ QUESTION_IMAGE_FRAGMENTS_DIR.mkdir(exist_ok=True)
 OPTION_FRAGMENTS_DIR.mkdir(exist_ok=True)
 
 def save_question_image(question_id:int,img:np.ndarray):
-    img_path = QUESTION_IMAGES_DIR / f'question_{question_id}.png'
+    img_path = QUESTION_IMAGES_DIR / f'{question_id}.png'
     cv2.imwrite(str(img_path),img)
     
 def load_question_image(question_id:int):
-    img_path = QUESTION_IMAGES_DIR / f'question_{question_id}.png'
+    img_path = QUESTION_IMAGES_DIR / f'{question_id}.png'
     img = cv2.imread(str(img_path))
     if img is None:
         return None
     return convert_image_to_base64(img)
 
+def delete_question_image(question_id:int):
+    img_path = QUESTION_IMAGES_DIR / f'{question_id}.png'
+    img_path.unlink(missing_ok=True)
+
 def save_question_image_fragment(question_id:int,image_order,img:np.ndarray):
     img_path = QUESTION_IMAGE_FRAGMENTS_DIR / f'question_{question_id}_{image_order}.png'
     cv2.imwrite(str(img_path),img)
+
+def load_question_image_fragment(question_id:int,image_order):
+    img_path = QUESTION_IMAGE_FRAGMENTS_DIR / f'question_{question_id}_{image_order}.png'
+    img = cv2.imread(str(img_path))
+    if img is None:
+        return None
+    return convert_image_to_base64(img)
+
 def save_option_image_fragment(question_id:int,option_id:int,image_order:int,img:np.ndarray):
     img_path = OPTION_FRAGMENTS_DIR / f'question_{question_id}_option_{option_id}_{image_order}.png'
     cv2.imwrite(str(img_path),img)
+
+def load_option_image_fragment(question_id:int,option_id:int,image_order):
+    img_path = OPTION_FRAGMENTS_DIR / f'question_{question_id}_option_{option_id}_{image_order}.png'
+    img = cv2.imread(str(img_path))
+    if img is None:
+        return None
+    return convert_image_to_base64(img)
 
 # Question Paper Processing
 DPI = 300
@@ -154,6 +173,103 @@ for i in range(NUMBER_OF_OPTIONS):
     #     (chr(ord('A')+i),[option_label_text_x,option_label_text_y])
     # )
 
+def create_question_form(file_path: str):
+    img = np.ones((A4_HEIGHT_PX, A4_WIDTH_PX, 3), dtype=np.uint8) * 255
+
+    # ---------- Draw ArUco markers ----------
+    for marker_id, (y, x) in marker_positions.items():
+        marker = cv2.aruco.generateImageMarker(
+            ARUCO_DICT, marker_id, A_MARKER_SIZE_PX
+        )
+        img[y:y+A_MARKER_SIZE_PX, x:x+A_MARKER_SIZE_PX] = cv2.cvtColor(
+            marker, cv2.COLOR_GRAY2BGR
+        )
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    thickness = 3
+
+    # ---------- Question label ----------
+    # cv2.putText(
+    #     img,
+    #     f"Write the content of the question in the following {NUMBER_OF_LINES_FOR_A_QUESTION} Lines. Only put 1-3 words in each box",
+    #     (MARGIN_SIZE_PX+20, question_1_textbox_start_y+40),
+    #     font,
+    #     1.2,
+    #     (0, 0, 0),
+    #     thickness
+    # )
+
+    # ---------- Question text box ----------
+    cv2.rectangle(
+        img,
+        (question_1_textbox_start_x, question_1_textbox_start_y),
+        (QUESTION_1_TEXTBOX_END_X, QUESTION_1_TEXTBOX_END_Y),
+        (0, 0, 0),
+        2
+    )
+
+    # ---------- Question blank boxes ----------
+    for bb in question_1_blank_boxes:
+        cv2.rectangle(img, bb[0], bb[1], (0, 0, 0), 2)
+
+    # ---------- Options header ----------
+    # cv2.putText(
+    #     img,
+    #     "OPTIONS (fill text in boxes)",
+    #     (MARGIN_SIZE_PX, option_text_box_start_y + 12),
+    #     font,
+    #     0.9,
+    #     (0, 0, 0),
+    #     thickness
+    # )
+
+    cv2.rectangle(
+        img,
+        (option_text_box_start_x, option_text_box_start_y),
+        (option_text_box_end_x, option_text_box_end_y),
+        (0, 0, 0),
+        2
+    )
+
+    # ---------- Option rows ----------
+    for i in range(NUMBER_OF_OPTIONS):
+        option_label = 'OPTION: '+ chr(ord("1") + i)
+
+        row_y = option_blank_box_start_y + i * (BLANK_BOX_HEIGHT_PX + MED_DIST_HEIGHT_PX)
+
+        # Option label (A, B, C, D)
+        cv2.putText(
+            img,
+            f"{option_label}",
+            (MARGIN_SIZE_PX, row_y -20),
+            font,
+            1.0,
+            (0, 0, 0),
+            thickness
+        )
+
+        # Mark FIRST option as correct (LEFT SIDE, CLEAR)
+        # if i == 0:
+        #     cv2.putText(
+        #         img,
+        #         "CORRECT →",
+        #         (MARGIN_SIZE_PX + 40, row_y + BLANK_BOX_HEIGHT_PX - 5),
+        #         font,
+        #         0.9,
+        #         (0, 120, 0),
+        #         thickness
+        #     )
+
+        # Draw option blank boxes
+        for j in range(NUMBER_OF_BLANK_BOXES_PER_LINE):
+            idx = i * NUMBER_OF_BLANK_BOXES_PER_LINE + j
+            bb = option_blank_boxes[idx]
+            cv2.rectangle(img, bb[0], bb[1], (0, 0, 0), 2)
+
+    cv2.imwrite(file_path, img)
+
+
+
 
 def detect_question_image(original_img:np.ndarray,convert_to_base64:bool=True):
 
@@ -246,3 +362,6 @@ def convert_image_to_base64(img:np.ndarray)->str:
     img_str = base64.b64encode(buffer.tobytes()).decode('ascii')
     return img_str
     
+if __name__=="__main__":
+    pass
+    # create_question_form('question_form.png')

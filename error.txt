@@ -1,0 +1,346 @@
++-------------------------------------------------- Traceback (most recent call last) ---------------------------------------------------+
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi_cli\cli.py:255 in dev                                                       |
+|                                                                                                                                        |
+|   252                                                                                                                                  |
+|   253     Otherwise, it uses the first [bold]FastAPI[/bold] app found in the imported module o                                         |
+|   254     """                                                                                                                          |
+| \u2771 255     _run(                                                                                                                        |
+|   256         path=path,                                                                                                               |
+|   257         host=host,                                                                                                               |
+|   258         port=port,                                                                                                               |
+|                                                                                                                                        |
+| +---------------- locals ----------------+                                                                                             |
+| |           app = None                   |                                                                                             |
+| |          host = '127.0.0.1'            |                                                                                             |
+| |          path = WindowsPath('main.py') |                                                                                             |
+| |          port = 8000                   |                                                                                             |
+| | proxy_headers = True                   |                                                                                             |
+| |        reload = True                   |                                                                                             |
+| |     root_path = ''                     |                                                                                             |
+| +----------------------------------------+                                                                                             |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi_cli\cli.py:111 in _run                                                      |
+|                                                                                                                                        |
+|   108         )                                                                                                                        |
+|   109                                                                                                                                  |
+|   110         try:                                                                                                                     |
+| \u2771 111             import_data = get_import_data(path=path, app_name=app)                                                               |
+|   112         except FastAPICLIException as e:                                                                                         |
+|   113             toolkit.print_line()                                                                                                 |
+|   114             toolkit.print(f"[error]{e}")                                                                                         |
+|                                                                                                                                        |
+| +------------------------------------ locals -------------------------------------+                                                    |
+| |           app = None                                                            |                                                    |
+| |       command = 'dev'                                                           |                                                    |
+| |          host = '127.0.0.1'                                                     |                                                    |
+| |          path = WindowsPath('main.py')                                          |                                                    |
+| |          port = 8000                                                            |                                                    |
+| | proxy_headers = True                                                            |                                                    |
+| |        reload = True                                                            |                                                    |
+| |     root_path = ''                                                              |                                                    |
+| |   server_type = 'development'                                                   |                                                    |
+| |       toolkit = <rich_toolkit.toolkit.RichToolkit object at 0x000001BF3C685DC0> |                                                    |
+| |       workers = None                                                            |                                                    |
+| +---------------------------------------------------------------------------------+                                                    |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi_cli\discover.py:126 in get_import_data                                      |
+|                                                                                                                                        |
+|   123         raise FastAPICLIException(f"Path does not exist {path}")                                                                 |
+|   124     mod_data = get_module_data_from_path(path)                                                                                   |
+|   125     sys.path.insert(0, str(mod_data.extra_sys_path))                                                                             |
+| \u2771 126     use_app_name = get_app_name(mod_data=mod_data, app_name=app_name)                                                            |
+|   127                                                                                                                                  |
+|   128     import_string = f"{mod_data.module_import_str}:{use_app_name}"                                                               |
+|   129                                                                                                                                  |
+|                                                                                                                                        |
+| +------------------------------------- locals -------------------------------------+                                                   |
+| | app_name = None                                                                  |                                                   |
+| | mod_data = ModuleData(                                                           |                                                   |
+| |                module_import_str='main',                                         |                                                   |
+| |                extra_sys_path=WindowsPath('E:/Question Website/backend'),        |                                                   |
+| |                module_paths=[                                                    |                                                   |
+| |                    WindowsPath('E:/Question Website/backend/main.py')            |                                                   |
+| |                ]                                                                 |                                                   |
+| |            )                                                                     |                                                   |
+| |     path = WindowsPath('main.py')                                                |                                                   |
+| +----------------------------------------------------------------------------------+                                                   |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi_cli\discover.py:70 in get_app_name                                          |
+|                                                                                                                                        |
+|    67                                                                                                                                  |
+|    68 def get_app_name(*, mod_data: ModuleData, app_name: Union[str, None] = None) -> str:                                             |
+|    69     try:                                                                                                                         |
+| \u2771  70         mod = importlib.import_module(mod_data.module_import_str)                                                                |
+|    71     except (ImportError, ValueError) as e:                                                                                       |
+|    72         logger.error(f"Import error: {e}")                                                                                       |
+|    73         logger.warning(                                                                                                          |
+|                                                                                                                                        |
+| +------------------------------------- locals -------------------------------------+                                                   |
+| | app_name = None                                                                  |                                                   |
+| | mod_data = ModuleData(                                                           |                                                   |
+| |                module_import_str='main',                                         |                                                   |
+| |                extra_sys_path=WindowsPath('E:/Question Website/backend'),        |                                                   |
+| |                module_paths=[                                                    |                                                   |
+| |                    WindowsPath('E:/Question Website/backend/main.py')            |                                                   |
+| |                ]                                                                 |                                                   |
+| |            )                                                                     |                                                   |
+| +----------------------------------------------------------------------------------+                                                   |
+|                                                                                                                                        |
+| C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90 in import_module                                    |
+|                                                                                                                                        |
+|    87             if character != '.':                                                         +----- locals -----+                    |
+|    88                 break                                                                    |   level = 0      |                    |
+|    89             level += 1                                                                   |    name = 'main' |                    |
+| \u2771  90     return _bootstrap._gcd_import(name[level:], package, level)                          | package = None   |                    |
+|    91                                                                                          +------------------+                    |
+|    92                                                                                                                                  |
+|    93 _RELOADING = {}                                                                                                                  |
+| in _gcd_import:1387                                                                                                                    |
+| +----- locals -----+                                                                                                                   |
+| |   level = 0      |                                                                                                                   |
+| |    name = 'main' |                                                                                                                   |
+| | package = None   |                                                                                                                   |
+| +------------------+                                                                                                                   |
+| in _find_and_load:1360                                                                                                                 |
+| +-------------------- locals --------------------+                                                                                     |
+| | module = <object object at 0x000001BF38D98050> |                                                                                     |
+| |   name = 'main'                                |                                                                                     |
+| +------------------------------------------------+                                                                                     |
+| in _find_and_load_unlocked:1331                                                                                                        |
+| +-------------------------------------------------------------- locals --------------------------------------------------------------+ |
+| |        name = 'main'                                                                                                               | |
+| |      parent = ''                                                                                                                   | |
+| | parent_spec = None                                                                                                                 | |
+| |        path = None                                                                                                                 | |
+| |        spec = ModuleSpec(name='main', loader=<_frozen_importlib_external.SourceFileLoader object at 0x000001BF3C686AE0>,           | |
+| |               origin='E:\\Question Website\\backend\\main.py')                                                                     | |
+| +------------------------------------------------------------------------------------------------------------------------------------+ |
+| in _load_unlocked:935                                                                                                                  |
+| +-------------------------------------------------------------- locals --------------------------------------------------------------+ |
+| | module = <module 'main' from 'E:\\Question Website\\backend\\main.py'>                                                             | |
+| |   spec = ModuleSpec(name='main', loader=<_frozen_importlib_external.SourceFileLoader object at 0x000001BF3C686AE0>,                | |
+| |          origin='E:\\Question Website\\backend\\main.py')                                                                          | |
+| +------------------------------------------------------------------------------------------------------------------------------------+ |
+| in exec_module:999                                                                                                                     |
+| +------------------------------------------------- locals --------------------------------------------------+                          |
+| |   code = <code object <module> at 0x000001BF3B2DCCC0, file "E:\Question Website\backend\main.py", line 1> |                          |
+| | module = <module 'main' from 'E:\\Question Website\\backend\\main.py'>                                    |                          |
+| |   self = <_frozen_importlib_external.SourceFileLoader object at 0x000001BF3C686AE0>                       |                          |
+| +-----------------------------------------------------------------------------------------------------------+                          |
+| in _call_with_frames_removed:488                                                                                                       |
+| +-------------------------------------------------------------- locals --------------------------------------------------------------+ |
+| | args = (                                                                                                                           | |
+| |            <code object <module> at 0x000001BF3B2DCCC0, file "E:\Question Website\backend\main.py", line 1>,                       | |
+| |            {                                                                                                                       | |
+| |                '__name__': 'main',                                                                                                 | |
+| |                '__doc__': None,                                                                                                    | |
+| |                '__package__': '',                                                                                                  | |
+| |                '__loader__': <_frozen_importlib_external.SourceFileLoader object at 0x000001BF3C686AE0>,                           | |
+| |                '__spec__': ModuleSpec(name='main', loader=<_frozen_importlib_external.SourceFileLoader object at                   | |
+| |        0x000001BF3C686AE0>, origin='E:\\Question Website\\backend\\main.py'),                                                      | |
+| |                '__file__': 'E:\\Question Website\\backend\\main.py',                                                               | |
+| |                '__cached__': 'E:\\Question Website\\backend\\__pycache__\\main.cpython-312.pyc',                                   | |
+| |                '__builtins__': {                                                                                                   | |
+| |                    '__name__': 'builtins',                                                                                         | |
+| |                    '__doc__': 'Built-in functions, types, exceptions, and other objects.\n\nThis module provides '+346,            | |
+| |                    '__package__': '',                                                                                              | |
+| |                    '__loader__': <class '_frozen_importlib.BuiltinImporter'>,                                                      | |
+| |                    '__spec__': ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>, origin='built-in'), | |
+| |                    '__build_class__': <built-in function __build_class__>,                                                         | |
+| |                    '__import__': <built-in function __import__>,                                                                   | |
+| |                    'abs': <built-in function abs>,                                                                                 | |
+| |                    'all': <built-in function all>,                                                                                 | |
+| |                    'any': <built-in function any>,                                                                                 | |
+| |                    ... +148                                                                                                        | |
+| |                }                                                                                                                   | |
+| |            }                                                                                                                       | |
+| |        )                                                                                                                           | |
+| |    f = <built-in function exec>                                                                                                    | |
+| | kwds = {}                                                                                                                          | |
+| +------------------------------------------------------------------------------------------------------------------------------------+ |
+|                                                                                                                                        |
+| E:\Question Website\backend\main.py:1 in <module>                                                                                      |
+|                                                                                                                                        |
+| \u2771  1 from fastapi import FastAPI                                                                                                       |
+|    2 from fastapi.middleware.cors import CORSMiddleware                                                                                |
+|    3 from fastapi_utils.tasks import repeat_every                                                                                      |
+|    4 # from mypackage import mymodule                                                                                                  |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\__init__.py:7 in <module>                                                   |
+|                                                                                                                                        |
+|    4                                                                                                                                   |
+|    5 from starlette import status as status                                                                                            |
+|    6                                                                                                                                   |
+| \u2771  7 from .applications import FastAPI as FastAPI                                                                                      |
+|    8 from .background import BackgroundTasks as BackgroundTasks                                                                        |
+|    9 from .datastructures import UploadFile as UploadFile                                                                              |
+|   10 from .exceptions import HTTPException as HTTPException                                                                            |
+|                                                                                                                                        |
+| +--------------------------------------------------------- locals ----------------------------------------------------------+          |
+| | status = <module 'starlette.status' from 'E:\\Question Website\\backend\\venv\\Lib\\site-packages\\starlette\\status.py'> |          |
+| +---------------------------------------------------------------------------------------------------------------------------+          |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\applications.py:16 in <module>                                              |
+|                                                                                                                                        |
+|     13     Union,                                                                               +----------- locals -----------+       |
+|     14 )                                                                                        | Awaitable = typing.Awaitable |       |
+|     15                                                                                          |  Callable = typing.Callable  |       |
+| \u2771   16 from fastapi import routing                                                              | Coroutine = typing.Coroutine |       |
+|     17 from fastapi.datastructures import Default, DefaultPlaceholder                           |      Dict = typing.Dict      |       |
+|     18 from fastapi.exception_handlers import (                                                 |      List = typing.List      |       |
+|     19     http_exception_handler,                                                              |  Optional = typing.Optional  |       |
+|                                                                                                 |  Sequence = typing.Sequence  |       |
+|                                                                                                 |      Type = typing.Type      |       |
+|                                                                                                 |     Union = typing.Union     |       |
+|                                                                                                 +------------------------------+       |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\routing.py:25 in <module>                                                   |
+|                                                                                                                                        |
+|     22     Union,                                                                                                                      |
+|     23 )                                                                                                                               |
+|     24                                                                                                                                 |
+| \u2771   25 from fastapi import params                                                                                                      |
+|     26 from fastapi._compat import (                                                                                                   |
+|     27     ModelField,                                                                                                                 |
+|     28     Undefined,                                                                                                                  |
+|                                                                                                                                        |
+| +------------------------------------------------------------- locals --------------------------------------------------------------+  |
+| |       asyncio = <module 'asyncio' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\asyncio\\__init__.py'> |  |
+| | AsyncIterator = typing.AsyncIterator                                                                                              |  |
+| |      Callable = typing.Callable                                                                                                   |  |
+| |    Collection = typing.Collection                                                                                                 |  |
+| |     Coroutine = typing.Coroutine                                                                                                  |  |
+| |   dataclasses = <module 'dataclasses' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\dataclasses.py'>   |  |
+| |          Dict = typing.Dict                                                                                                       |  |
+| |         email = <module 'email' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\email\\__init__.py'>     |  |
+| |       inspect = <module 'inspect' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\inspect.py'>           |  |
+| |          json = <module 'json' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\json\\__init__.py'>       |  |
+| |          List = typing.List                                                                                                       |  |
+| |       Mapping = typing.Mapping                                                                                                    |  |
+| |      Optional = typing.Optional                                                                                                   |  |
+| |      Sequence = typing.Sequence                                                                                                   |  |
+| |           Set = typing.Set                                                                                                        |  |
+| |         Tuple = typing.Tuple                                                                                                      |  |
+| |          Type = typing.Type                                                                                                       |  |
+| |         Union = typing.Union                                                                                                      |  |
+| +-----------------------------------------------------------------------------------------------------------------------------------+  |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\params.py:5 in <module>                                                     |
+|                                                                                                                                        |
+|     2 from enum import Enum                                                                                                            |
+|     3 from typing import Any, Callable, Dict, List, Optional, Sequence, Union                                                          |
+|     4                                                                                                                                  |
+| \u2771   5 from fastapi.openapi.models import Example                                                                                       |
+|     6 from pydantic.fields import FieldInfo                                                                                            |
+|     7 from typing_extensions import Annotated, deprecated                                                                              |
+|     8                                                                                                                                  |
+|                                                                                                                                        |
+| +------------------------------------------------------- locals -------------------------------------------------------+               |
+| | Callable = typing.Callable                                                                                           |               |
+| |     Dict = typing.Dict                                                                                               |               |
+| |     List = typing.List                                                                                               |               |
+| | Optional = typing.Optional                                                                                           |               |
+| | Sequence = typing.Sequence                                                                                           |               |
+| |    Union = typing.Union                                                                                              |               |
+| | warnings = <module 'warnings' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\warnings.py'> |               |
+| +----------------------------------------------------------------------------------------------------------------------+               |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\openapi\models.py:4 in <module>                                             |
+|                                                                                                                                        |
+|     1 from enum import Enum                                                                    +---------- locals ----------+          |
+|     2 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union       | Callable = typing.Callable |          |
+|     3                                                                                          |     Dict = typing.Dict     |          |
+| \u2771   4 from fastapi._compat import (                                                            | Iterable = typing.Iterable |          |
+|     5     PYDANTIC_V2,                                                                         |     List = typing.List     |          |
+|     6     CoreSchema,                                                                          | Optional = typing.Optional |          |
+|     7     GetJsonSchemaHandler,                                                                |      Set = typing.Set      |          |
+|                                                                                                |     Type = typing.Type     |          |
+|                                                                                                |    Union = typing.Union    |          |
+|                                                                                                +----------------------------+          |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\_compat.py:22 in <module>                                                   |
+|                                                                                                                                        |
+|    19     cast,                                                                                +----------- locals -----------+        |
+|    20 )                                                                                        |  Callable = typing.Callable  |        |
+|    21                                                                                          |     Deque = typing.Deque     |        |
+| \u2771  22 from fastapi.exceptions import RequestErrorModel                                         |      Dict = typing.Dict      |        |
+|    23 from fastapi.types import IncEx, ModelNameMap, UnionType                                 | FrozenSet = typing.FrozenSet |        |
+|    24 from pydantic import BaseModel, create_model                                             |      List = typing.List      |        |
+|    25 from pydantic.version import VERSION as PYDANTIC_VERSION                                 |   Mapping = typing.Mapping   |        |
+|                                                                                                |  Sequence = typing.Sequence  |        |
+|                                                                                                |       Set = typing.Set       |        |
+|                                                                                                |     Tuple = typing.Tuple     |        |
+|                                                                                                |      Type = typing.Type      |        |
+|                                                                                                |     Union = typing.Union     |        |
+|                                                                                                +------------------------------+        |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\fastapi\exceptions.py:3 in <module>                                                 |
+|                                                                                                                                        |
+|     1 from typing import Any, Dict, Optional, Sequence, Type, Union                            +---------- locals ----------+          |
+|     2                                                                                          |     Dict = typing.Dict     |          |
+| \u2771   3 from pydantic import BaseModel, create_model                                             | Optional = typing.Optional |          |
+|     4 from starlette.exceptions import HTTPException as StarletteHTTPException                 | Sequence = typing.Sequence |          |
+|     5 from starlette.exceptions import WebSocketException as StarletteWebSocketException       |     Type = typing.Type     |          |
+|     6 from typing_extensions import Annotated, Doc                                             |    Union = typing.Union    |          |
+|                                                                                                +----------------------------+          |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\pydantic\__init__.py:5 in <module>                                                  |
+|                                                                                                                                        |
+|     2 from importlib import import_module                                                                                              |
+|     3 from warnings import warn                                                                                                        |
+|     4                                                                                                                                  |
+| \u2771   5 from ._migration import getattr_migration                                                                                        |
+|     6 from .version import VERSION                                                                                                     |
+|     7                                                                                                                                  |
+|     8 if typing.TYPE_CHECKING:                                                                                                         |
+|                                                                                                                                        |
+| +---------------------------------------------------- locals ----------------------------------------------------+                     |
+| | typing = <module 'typing' from 'C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\typing.py'> |                     |
+| |   warn = <built-in function warn>                                                                              |                     |
+| +----------------------------------------------------------------------------------------------------------------+                     |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\pydantic\_migration.py:4 in <module>                                                |
+|                                                                                                                                        |
+|     1 import sys                                                                                                                       |
+|     2 from typing import Any, Callable                                                                                                 |
+|     3                                                                                                                                  |
+| \u2771   4 from .version import version_short                                                                                               |
+|     5                                                                                                                                  |
+|     6 MOVED_IN_V2 = {                                                                                                                  |
+|     7     'pydantic.utils:version_info': 'pydantic.version:version_info',                                                              |
+|                                                                                                                                        |
+| +--------------- locals ---------------+                                                                                               |
+| | Callable = typing.Callable           |                                                                                               |
+| |      sys = <module 'sys' (built-in)> |                                                                                               |
+| +--------------------------------------+                                                                                               |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\pydantic\version.py:5 in <module>                                                   |
+|                                                                                                                                        |
+|    2                                                                                                                                   |
+|    3 from __future__ import annotations as _annotations                                                                                |
+|    4                                                                                                                                   |
+| \u2771  5 from pydantic_core import __version__ as __pydantic_core_version__                                                                |
+|    6                                                                                                                                   |
+|    7 __all__ = 'VERSION', 'version_info'                                                                                               |
+|    8                                                                                                                                   |
+|                                                                                                                                        |
+| +--------------------------- locals ----------------------------+                                                                      |
+| | _annotations = _Feature((3, 7, 0, 'beta', 1), None, 16777216) |                                                                      |
+| +---------------------------------------------------------------+                                                                      |
+|                                                                                                                                        |
+| E:\Question Website\backend\venv\Lib\site-packages\pydantic_core\__init__.py:6 in <module>                                             |
+|                                                                                                                                        |
+|     3 import sys as _sys                                                                                                               |
+|     4 from typing import Any as _Any                                                                                                   |
+|     5                                                                                                                                  |
+| \u2771   6 from ._pydantic_core import (                                                                                                    |
+|     7     ArgsKwargs,                                                                                                                  |
+|     8     MultiHostUrl,                                                                                                                |
+|     9     PydanticCustomError,                                                                                                         |
+|                                                                                                                                        |
+| +--------------------------- locals ---------------------------+                                                                       |
+| |        _sys = <module 'sys' (built-in)>                      |                                                                       |
+| | annotations = _Feature((3, 7, 0, 'beta', 1), None, 16777216) |                                                                       |
+| +--------------------------------------------------------------+                                                                       |
++----------------------------------------------------------------------------------------------------------------------------------------+
+ModuleNotFoundError: No module named 'pydantic_core._pydantic_core'
