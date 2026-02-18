@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi import UploadFile
-from fastapi import responses
+from fastapi.responses import FileResponse
 import database
 import base64
 import numpy as np
@@ -103,6 +103,12 @@ async def get_setter_questions(cu:UserRead=Depends(check_current_user_role(['set
     questions = await database.get_all_questions_from_setter(cu.user_id)
     return questions
     pass
+
+
+@router.get('/question-form')
+async def get_question_form(cu:UserRead=Depends(check_current_user_role(['setter']))):
+    return FileResponse('question_form.png')
+
 
 @router.get('/question-image')
 async def get_question_image(question_id:int,cu:UserRead=Depends(check_current_user_role(['setter']))):
